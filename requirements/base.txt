@@ -1,4 +1,5 @@
 metsrw==0.2.0
+lxml
 requests<3.0
 sqlalchemy
 six

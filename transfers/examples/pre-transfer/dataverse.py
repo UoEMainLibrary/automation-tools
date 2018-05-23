@@ -30,12 +30,13 @@ EXTENSION_MAPPING = {
     'SPSS SAV': '.sav',
     'Stata Binary': '.dta',
     'Stata 13 Binary': '.dta',
+    'UNKNOWN': '',
 }
 
 
 def get_ddi_titl_author(j):
     titl_text = authenty_text = None
-    for field in j['latestVersion']['metadataBlocks']['citation']['fields']:
+    for field in j['datasetVersion']['metadataBlocks']['citation']['fields']:
         if field['typeName'] == 'title':
             titl_text = field['value']
         if field['typeName'] == 'author':
@@ -51,11 +52,11 @@ def create_ddi(j):
     titl_text, authenty_text = get_ddi_titl_author(j)
     agency = j['protocol']
     idno = j['authority'] + '/' + j['identifier']
-    version_date = j['latestVersion']['releaseTime']
-    version_type = j['latestVersion']['versionState']
-    version_num = "{}.{}".format(j['latestVersion']['versionNumber'],
-                                 j['latestVersion']['versionMinorNumber'])
-    restrctn_text = j['latestVersion'].get('termsOfUse')
+    version_date = j['datasetVersion']['releaseTime']
+    version_type = j['datasetVersion']['versionState']
+    version_num = "{}.{}".format(j['datasetVersion']['versionNumber'],
+                                 j['datasetVersion']['versionMinorNumber'])
+    restrctn_text = j['datasetVersion'].get('termsOfUse')
 
     # create XML
     nsmap = {'ddi': 'http://www.icpsr.umich.edu/DDI'}
@@ -104,16 +105,16 @@ def create_bundle(tabfile_json):
     )
 
     # Find original file
-    ext = EXTENSION_MAPPING[tabfile_json['datafile']['originalFormatLabel']]
+    ext = EXTENSION_MAPPING[tabfile_json['dataFile']['originalFormatLabel']]
     original_file = metsrw.FSEntry(
         path=base_name + '/' + base_name + ext,
         use='original',
         file_uuid=str(uuid.uuid4()),
         checksumtype='MD5',
-        checksum=tabfile_json['datafile']['md5']
+        checksum=tabfile_json['dataFile']['md5']
     )
     bundle.add_child(original_file)
-    if tabfile_json['datafile']['originalFormatLabel'] != "R Data":
+    if tabfile_json['dataFile']['originalFormatLabel'] != "R Data":
         # RData derivative
         f = metsrw.FSEntry(
             path=base_name + '/' + base_name + '.RData',
@@ -127,7 +128,7 @@ def create_bundle(tabfile_json):
     # FIXME what is the actual path for the files?
     # Tabfile
     f = metsrw.FSEntry(
-        path=base_name + '/' + tabfile_json['datafile']['name'],
+        path=base_name + '/' + tabfile_json['dataFile']['filename'],
         use='derivative',
         derived_from=original_file,
         file_uuid=str(uuid.uuid4()),
@@ -169,9 +170,10 @@ def create_bundle(tabfile_json):
     return bundle
 
 
-def main(transfer_path):
+def main(transfer_path, dataset_md_name="dataset.json",
+         md_path=None, md_name=None):
     # Read JSON
-    json_path = os.path.join(transfer_path, 'metadata', 'dataset.json')
+    json_path = os.path.join(transfer_path, 'metadata', dataset_md_name)
     with open(json_path, 'r') as f:
         j = json.load(f)
 
@@ -199,19 +201,19 @@ def main(transfer_path):
     )
 
     # Add original files
-    for file_json in j['latestVersion']['files']:
+    for file_json in j['datasetVersion']['files']:
         # TODO how to actually tell what is original file?
-        if file_json['datafile']['name'].endswith('.tab'):
+        if file_json['dataFile']['filename'].endswith('.tab'):
             # If tabfile, set up bundle
             bundle = create_bundle(file_json)
             sip.add_child(bundle)
         else:
             f = metsrw.FSEntry(
-                path=file_json['datafile']['name'],
+                path=file_json['dataFile']['filename'],
                 use='original',
                 file_uuid=str(uuid.uuid4()),
                 checksumtype='MD5',
-                checksum=file_json['datafile']['md5'],
+                checksum=file_json['dataFile']['md5'],
             )
             sip.add_child(f)
 
@@ -232,11 +234,16 @@ def main(transfer_path):
     md_dir.add_child(f)
 
     # Write METS
-    metadata_path = os.path.join(transfer_path, 'metadata')
+    metadata_path = md_path
+    if metadata_path is None:
+        metadata_path = os.path.join(transfer_path, 'metadata')
     if not os.path.exists(metadata_path):
         os.makedirs(metadata_path)
 
-    mets_path = os.path.join(metadata_path, 'METS.xml')
+    metadata_name = md_name
+    if metadata_name is None:
+        metadata_name = "METS.xml"
+    mets_path = os.path.join(metadata_path, metadata_name)
     mets_f = metsrw.METSDocument()
     mets_f.append_file(sip)
     # print(mets_f.tostring(fully_qualified=True).decode('ascii'))

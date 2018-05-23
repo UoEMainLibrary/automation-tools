@@ -1,8 +1,9 @@
 {
     "authority": "10.5072/FK2",
-    "datasetVersion": {
+    "id": 574,
+    "identifier": "6PPJ6Y",
+    "latestVersion": {
         "UNF": "UNF:6:IgxkjKXUlveGP0Darp1fYg==",
-        "citation": "Tester, Archivematica, 2018, \"A study of my afternoon drinks\", https://doi.org/10.5072/FK2/6PPJ6Y, Root Dataverse, V1, UNF:6:IgxkjKXUlveGP0Darp1fYg==",
         "createTime": "2018-05-09T20:33:36Z",
         "files": [
             {
@@ -163,8 +164,6 @@
         "versionNumber": 1,
         "versionState": "RELEASED"
     },
-    "id": 574,
-    "identifier": "6PPJ6Y",
     "persistentUrl": "https://doi.org/10.5072/FK2/6PPJ6Y",
     "protocol": "doi",
     "publicationDate": "2018-05-09",

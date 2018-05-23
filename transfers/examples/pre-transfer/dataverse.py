@@ -36,7 +36,7 @@ EXTENSION_MAPPING = {
 
 def get_ddi_titl_author(j):
     titl_text = authenty_text = None
-    for field in j['datasetVersion']['metadataBlocks']['citation']['fields']:
+    for field in j['latestVersion']['metadataBlocks']['citation']['fields']:
         if field['typeName'] == 'title':
             titl_text = field['value']
         if field['typeName'] == 'author':
@@ -52,11 +52,11 @@ def create_ddi(j):
     titl_text, authenty_text = get_ddi_titl_author(j)
     agency = j['protocol']
     idno = j['authority'] + '/' + j['identifier']
-    version_date = j['datasetVersion']['releaseTime']
-    version_type = j['datasetVersion']['versionState']
-    version_num = "{}.{}".format(j['datasetVersion']['versionNumber'],
-                                 j['datasetVersion']['versionMinorNumber'])
-    restrctn_text = j['datasetVersion'].get('termsOfUse')
+    version_date = j['latestVersion']['releaseTime']
+    version_type = j['latestVersion']['versionState']
+    version_num = "{}.{}".format(j['latestVersion']['versionNumber'],
+                                 j['latestVersion']['versionMinorNumber'])
+    restrctn_text = j['latestVersion'].get('termsOfUse')
 
     # create XML
     nsmap = {'ddi': 'http://www.icpsr.umich.edu/DDI'}
@@ -201,7 +201,7 @@ def main(transfer_path, dataset_md_name="dataset.json",
     )
 
     # Add original files
-    for file_json in j['datasetVersion']['files']:
+    for file_json in j['latestVersion']['files']:
         # TODO how to actually tell what is original file?
         if file_json['dataFile']['filename'].endswith('.tab'):
             # If tabfile, set up bundle

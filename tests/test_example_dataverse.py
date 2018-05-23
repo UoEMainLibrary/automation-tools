@@ -67,12 +67,12 @@ class TestDataverseExample(object):
 
     @pytest.mark.parametrize(
         "fixture_path, fixture_name, mets_output_path, mets_name",
-        [(fixture_path, dv_1.fname,
-          write_dir, "METS.{}.xml".format(dv_1.fname)),
-         (fixture_path, dv_2.fname,
-          write_dir, "METS.{}.xml".format(dv_2.fname)),
-         (fixture_path, dv_3.fname,
-          write_dir, "METS.{}.xml".format(dv_3.fname)),
+        [#(fixture_path, dv_1.fname,
+          #write_dir, "METS.{}.xml".format(dv_1.fname)),
+         #(fixture_path, dv_2.fname,
+         # write_dir, "METS.{}.xml".format(dv_2.fname)),
+         #(fixture_path, dv_3.fname,
+         # write_dir, "METS.{}.xml".format(dv_3.fname)),
          (fixture_path, dv_4.fname,
           write_dir, "METS.{}.xml".format(dv_4.fname)),
          ])

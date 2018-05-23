@@ -1,13 +1,18 @@
 #!/usr/bin/env python
-"""
-Parse dataset.json and produce a METS.xml with the DDI info and a structMap with the expected transfer structure inside the research data package.
+# -*- coding: utf-8 -*-
+
+"""dataverse.py
+
+Parse dataset.json and produce a METS.xml with the DDI info and a structMap
+with the expected transfer structure inside the research data package.
 """
 from __future__ import print_function
 import json
-from lxml import etree
 import os
 import sys
 import uuid
+
+from lxml import etree
 
 import metsrw
 
@@ -27,6 +32,7 @@ EXTENSION_MAPPING = {
     'Stata 13 Binary': '.dta',
 }
 
+
 def get_ddi_titl_author(j):
     titl_text = authenty_text = None
     for field in j['latestVersion']['metadataBlocks']['citation']['fields']:
@@ -35,6 +41,7 @@ def get_ddi_titl_author(j):
         if field['typeName'] == 'author':
             authenty_text = field['value'][0]['authorName']['value']
     return titl_text, authenty_text
+
 
 def create_ddi(j):
     """
@@ -46,7 +53,8 @@ def create_ddi(j):
     idno = j['authority'] + '/' + j['identifier']
     version_date = j['latestVersion']['releaseTime']
     version_type = j['latestVersion']['versionState']
-    version_num = str(j['latestVersion']['versionNumber']) + '.' + str(j['latestVersion']['versionMinorNumber'])
+    version_num = "{}.{}".format(j['latestVersion']['versionNumber'],
+                                 j['latestVersion']['versionMinorNumber'])
     restrctn_text = j['latestVersion'].get('termsOfUse')
 
     # create XML
@@ -54,7 +62,12 @@ def create_ddi(j):
     ddins = '{' + nsmap['ddi'] + '}'
     ddi_root = etree.Element(ddins + 'codebook', nsmap=nsmap)
     ddi_root.attrib['version'] = '2.5'
-    ddi_root.attrib['{http://www.w3.org/2001/XMLSchema-instance}schemaLocation'] = 'http://www.ddialliance.org/Specification/DDI-Codebook/2.5/XMLSchema/codebook.xsd'
+
+    root_ns = '{http://www.w3.org/2001/XMLSchema-instance}schemaLocation'
+    dv_ns = ('http://www.ddialliance.org/Specification/DDI-Codebook/2.5/'
+             'XMLSchema/codebook.xsd')
+    ddi_root.attrib[root_ns] = dv_ns
+
     stdydscr = etree.SubElement(ddi_root, ddins + 'stdyDscr', nsmap=nsmap)
     citation = etree.SubElement(stdydscr, ddins + 'citation', nsmap=nsmap)
 
@@ -69,13 +82,15 @@ def create_ddi(j):
     etree.SubElement(diststmt, ddins + 'distrbtr').text = DISTRBTR
 
     verstmt = etree.SubElement(citation, ddins + 'verStmt')
-    etree.SubElement(verstmt, ddins + 'version', date=version_date, type=version_type).text = version_num
+    etree.SubElement(verstmt, ddins + 'version', date=version_date,
+                     type=version_type).text = version_num
 
     dataaccs = etree.SubElement(stdydscr, ddins + 'dataAccs')
     usestmt = etree.SubElement(dataaccs, ddins + 'useStmt')
     etree.SubElement(usestmt, ddins + 'restrctn').text = restrctn_text
 
     return ddi_root
+
 
 def create_bundle(tabfile_json):
     """
@@ -152,6 +167,7 @@ def create_bundle(tabfile_json):
     bundle.add_child(f)
 
     return bundle
+
 
 def main(transfer_path):
     # Read JSON

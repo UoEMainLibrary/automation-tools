@@ -47,6 +47,12 @@ dv_4 = DataverseMDIndex("4.8.6",
                         "persistentId=doi:10.5072/FK2/6PPJ6Y",
                         "demo.dataverse.org.doi.10.5072.4.json")
 
+dv_5 = DataverseMDIndex("4.8.6",
+                        "2018-06-24T20:33:36Z",
+                        "A/V and large size files [test]",
+                        "https://demodv.scholarsportal.info/dataset.xhtml?"
+                        "persistentId=doi:10.5072/FK2/6PPJ6Y",
+                        "demo.dataverse.org.doi.10.5072.5.json")
 
 class TestDataverseExample(object):
 
@@ -75,6 +81,8 @@ class TestDataverseExample(object):
          # write_dir, "METS.{}.xml".format(dv_3.fname)),
          (fixture_path, dv_4.fname,
           write_dir, "METS.{}.xml".format(dv_4.fname)),
+         (fixture_path, dv_5.fname,
+          write_dir, "METS.{}.xml".format(dv_5.fname)),
          ])
     def test_parse_dataverse(self,
                              fixture_path,
